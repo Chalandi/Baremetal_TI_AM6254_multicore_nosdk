@@ -6,9 +6,9 @@ Features :
   -  Quad-core ARM Cortex-A53 booting support
   - MMU Setup for 4GB space 
   - GIC configuration
-  - Interrupt vector tables for both cores
+  - Interrupt vector tables for the Quad-core ARM Cortex-A53
   - One timer interrupt per core
-  - LED blinking from all four A53 cores
+  - LED blinking from all Quad-core ARM Cortex-A53
 
 A clear and easy-to-understand implementation in C11 and assembly with a build system based on GNU Make makes this project both fun and educational.
 
