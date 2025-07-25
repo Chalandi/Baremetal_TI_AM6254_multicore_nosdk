@@ -1,4 +1,10 @@
 # Bare Metal TI AM6254 Project
+
+
+[![Build Status](https://github.com/Chalandi/Baremetal_TI_AM6254_multicore_nosdk/actions/workflows/baremetal_am6254_nosdk.yml/badge.svg)](https://github.com/Chalandi/Baremetal_TI_AM6254_multicore_nosdk/actions)
+
+
+
 This repository implements a fully manually-written bare-metal project for the TI AM6254 (PocketBeagle2 Board) without using TI's SDK.
 
 Features :
