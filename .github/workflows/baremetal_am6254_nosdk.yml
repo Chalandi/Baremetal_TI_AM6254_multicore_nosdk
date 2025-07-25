@@ -1,4 +1,4 @@
-﻿name: baremetal_am6254_nosdk
+﻿name: baremetal_ti_am6254_multicore_nosdk
 
 on:
   push:
