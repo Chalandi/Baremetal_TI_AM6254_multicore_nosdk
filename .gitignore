@@ -1,0 +1,9 @@
+# ignore output files
+/Output
+/Doc
+
+# ignore Visual Studio's user-specific files
+/.vs/
+*.user
+*.log
+*.bak

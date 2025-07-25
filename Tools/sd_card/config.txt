@@ -1,0 +1,7 @@
+a53_start_address=0x80000000
+m4f_start_address=0x05000000
+r5f_start_address=0x70000200
+
+a53_binary_file=a53_baremetal_am6254_nosdk.bin
+m4f_binary_file=m4f.bin
+r5f_binary_file=r5f.bin
