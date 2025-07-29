@@ -1,0 +1,37 @@
+;This configuration file is generated with T32Start2
+;===================================================
+
+;Environment Variables
+OS=
+ID=T32_1000008
+TMP=${TEMP}
+SYS=C:\T32
+HELP=C:\T32\pdf
+
+; Standard License File (license.t32) used
+
+;T32 Intercom
+; not used
+
+;T32 API Access (UDP/TCP) not used
+
+;T32 GDB
+; not used
+
+;T32 TCF
+; not used
+
+
+;Connection to Host
+PBI=ICD
+USB
+INSTANCE=AUTO
+
+
+;Screen Settings
+SCREEN=
+FONT=SMALL
+HEADER=AM6254A
+
+;Printer Settings:
+PRINTER=WINDOWS

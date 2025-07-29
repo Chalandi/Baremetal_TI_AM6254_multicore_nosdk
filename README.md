@@ -5,16 +5,17 @@
 
 
 
-This repository implements a fully manually-written bare-metal project for the TI AM6254 (PocketBeagle2 Board) without using TI's SDK.
+This repository contains a fully hand-written bare-metal project for the TI AM6254 (PocketBeagle2 Board) without using TI’s SDK.
 
 Features :
 
-  -  Quad-core ARM Cortex-A53 booting support
-  - MMU Setup for 4GB space 
-  - GIC configuration
-  - Interrupt vector tables for the Quad-core ARM Cortex-A53
-  - One timer interrupt per core
-  - LED blinking from all Quad-core ARM Cortex-A53
+  -  Supports booting of all available cores on the SoC (Quad-core ARM Cortex-A53, ARM Cortex-R5F and ARM Cortex-M4F)
+  - MU setup for 4 GB address space on the A53 cores
+  - GIC configuration on the A53 cores.
+  - VIM configuration on the R5F core.
+  - Interrupt vector tables on all cores
+  - One timer interrupt per core type
+  - LED blinking from all four ARM Cortex-A53 cores
 
 A clear and easy-to-understand implementation in C11 and assembly with a build system based on GNU Make makes this project both fun and educational.
 
@@ -45,22 +46,52 @@ The file `tiboot3.bin` is the prebuilt SBL binary used to boot raw images on the
 
 ## Details on the Application
 
+### ARM Cortex-A53 
+
 The start-up code sets up the runtime environment for the quad-core ARM Cortex-A53 and configures the MMU with a flat mapping of the first 4 GB of memory, following the AM6254 memory map.
 
 The application runs in EL3. It initializes the GIC and enables the timer interrupt for the quad-core ARM Cortex-A53. 
 
 Four LEDs blink (one for each core) controlled from the timer ISR.
 
+### ARM Cortex-R5F
+
+The start-up code initializes the runtime environment for the ARM Cortex-R5F and configures the Vectored Interrupt Manager (VIM).
+
+The application runs in ARM state and enables a timer interrupt with a 1-millisecond timeout using WKUP_TIMER1.
+
+### ARM Cortex-M4F
+
+The start-up code initializes the runtime environment for the ARM Cortex-M4F and configures the NVIC.
+
+The application enables a timer interrupt with a 1-second timeout using the SysTick timer.
+
 ## Building the Application
 
-To build the project, you need an installed ARM GCC compiler for 64-bit architecture (aarch64-none-elf).
+To build the project, you need an installed ARM GCC compiler for 64-bit architecture (aarch64-none-elf) and for 32-bit architecture (arm-none-eabi).
 
-Run the following commands :
+Run the following commands to build the main application for ARM Cortex-A53 :
 
 ```sh
 cd ./Build
 Rebuild.sh a53
 ```
+
+Run the following commands to build the main application for ARM Cortex-R5F :
+
+```sh
+cd ./Build
+Rebuild.sh r5f
+```
+
+Run the following commands to build the main application for ARM Cortex-M4F :
+
+```sh
+cd ./Build
+Rebuild.sh m4f
+```
+
+
 
 The build process generates the following outputs in the `Output` directory :
 

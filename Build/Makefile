@@ -49,7 +49,7 @@ else ifeq ($(CORE_FAMILY), m4f)
 
 else
     TOOLCHAIN          = arm-none-eabi
-    ARCH               = -mcpu=cortex-r5 -mthumb -mfloat-abi=hard -mfpu=vfpv3-d16
+    ARCH               = -mcpu=cortex-r5 -marm -mfloat-abi=hard -mfpu=vfpv3-d16
     DEFS               =
     SPEC               = --specs=nano.specs  --specs=nosys.specs
 
@@ -209,10 +209,19 @@ endif
 ############################################################################################
 
 SRC_FILES := $(SRC_DIR)/Appli/Core/$(CORE_FAMILY)/main.c                     \
+             $(SRC_DIR)/Mcal/Timer/timer.c                                   \
+             $(SRC_DIR)/Mcal/VIM/vim.c                                       \
              $(SRC_DIR)/Startup/Core/$(CORE_FAMILY)/Startup.c                \
-             $(SRC_DIR)/Startup/Core/$(CORE_FAMILY)/boot.s                   \
-             $(SRC_DIR)/Startup/Core/$(CORE_FAMILY)/intvect.s                \
              $(SRC_DIR)/Std/StdLib.c
+
+ifneq ($(CORE_FAMILY), m4f)
+    SRC_FILES += $(SRC_DIR)/Startup/Core/$(CORE_FAMILY)/boot.s
+    SRC_FILES += $(SRC_DIR)/Startup/Core/$(CORE_FAMILY)/intvect.s
+else
+    SRC_FILES += $(SRC_DIR)/Startup/Core/$(CORE_FAMILY)/IntVect.c
+    SRC_FILES += $(SRC_DIR)/Mcal/SysTickTimer/SysTickTimer.c
+endif
+
 
 
 
@@ -225,6 +234,9 @@ INC_FILES := $(SRC_DIR)                             \
              $(SRC_DIR)/Appli/Core/$(CORE_FAMILY)   \
              $(SRC_DIR)/Mcal                        \
              $(SRC_DIR)/Mcal/Gpio                   \
+             $(SRC_DIR)/Mcal/SysTickTimer           \
+             $(SRC_DIR)/Mcal/Timer                  \
+             $(SRC_DIR)/Mcal/VIM                    \
              $(SRC_DIR)/Startup                     \
              $(SRC_DIR)/Startup/Core/$(CORE_FAMILY) \
              $(SRC_DIR)/Std

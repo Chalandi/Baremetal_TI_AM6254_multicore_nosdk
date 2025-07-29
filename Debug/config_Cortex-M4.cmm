@@ -1,0 +1,155 @@
+;--------------------------------------------------------------------------------
+; Close the debug session log file
+;--------------------------------------------------------------------------------
+
+SYStem.RESet
+LOG.CLOSE
+AREA.CLEAR
+
+;--------------------------------------------------------------------------------
+; Handle trace32 events
+;--------------------------------------------------------------------------------
+ON ERROR CONTinue
+
+;--------------------------------------------------------------------------------
+; Configure the debug interfate (Cpu, Jtag, Dap, GIC, ...)
+;--------------------------------------------------------------------------------
+&param_core="2"
+&param_prepare=0
+
+ IF "&param_core"=="0"                    ; SMS: TIFS
+ (   
+   SYStem.CPU AM625X-CM4-SMS0
+   SYStem.CONFIG.MEMORYAP1.Port 7.
+   SYStem.CONFIG CORE 6. 1.
+   &dp=0x40000368
+ )
+ ELSE  IF "&param_core"=="1"              ; SMS: HSM
+ (                     
+   SYStem.CPU AM625X-CM4-SMS1
+   SYStem.CONFIG.MEMORYAP1.Port 9.
+   SYStem.CONFIG CORE 7. 1.
+   &dp=0x4000036C
+ )
+ ELSE
+ (   
+   SYStem.CPU AM625X-CM4-BLAZAR           ; BLAZAR: MCU
+   SYStem.CONFIG.MEMORYAP1.Port 8.
+   SYStem.CONFIG CORE 8. 1.
+   &dp=0x40000360
+ ) 
+
+SYStem.JTAGCLOCK CTCK 25MHz
+SYStem.MemAccess.DAP
+SYStem.Option.imaskasm.on
+SYStem.Option.IMASKHLL.ON
+
+SYStem.option DUALPORT on
+
+break.select program onchip
+break.select read onchip
+break.select write onchip
+
+ IF (&param_prepare==1)
+ (  
+  ;Reset at AP to clear state
+   SYStem.Mode Prepare
+   data.Set EDBG:0x400003f0 %Long 0x00190000    ; Ensure P-AP unlocked
+   data.Set EDBG:0x400003f0 %Long 0yxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx1    ; Soft reset
+   wait 10.mS
+   Data.Set EAXI:0x44135120 %LE %Long 0x4658FC21 ; on HS this will abort if auth failed
+   data.Set EAXI:0x44135124 %LE %Long 0x3AC4F102
+   wait 1.uS
+   data.Set EAXI:0x44135150 %LE %Long 0xa 
+ )
+
+ SYStem.Mode Prepare 
+ Data.Set EDBG:&dp %Long 0yxxxxxxxxxxxxxx0000xxxxxxxxxxxxxx
+
+;--------------------------------------------------------------------------------
+; Enable breakpoints in all CPU modes
+;--------------------------------------------------------------------------------
+SYStem.Option.ZoneSPACES ON ; Enable symbol management
+Break.CONFIG.MatchZone ON ; Enable bp match in different zones
+Break.IMPL Program Onchip
+Break.IMPL Read Onchip
+Break.IMPL Write Onchip
+SYStem.Option BreakOS ON
+
+;--------------------------------------------------------------------------------
+; Set source path
+;--------------------------------------------------------------------------------
+;sYmbol.SourcePATH.SetBaseDir "\\wsl.localhost\Ubuntu-22.04\home\achalandi\Workspace"
+
+
+;--------------------------------------------------------------------------------
+; Create custom buttons in the toolbar
+;--------------------------------------------------------------------------------
+MENU.ReProgram
+(
+  ADD
+  TOOLBAR
+  (
+    TOOLITEM "Go to PC" "[:here]"
+    (
+      Break
+      List Register(pc) /Track /MarkPC
+    )
+
+    TOOLITEM "Reset the target" "Reset,R"
+    (
+      ; SW Reset
+      SYStem.Mode Prepare
+      WAIT 1s
+      SYStem.Mode Attach
+
+    )
+
+    TOOLITEM "Edit startup script" "[:edit]"
+    (
+      PEDIT config_Cortex-M4.cmm
+    )
+
+    TOOLITEM "Run startup script" "[:practice]"
+    (
+      DO config_Cortex-M4.cmm
+      Data.LOAD.Elf ..\Output\m4f_baremetal_am6254_nosdk.elf /NoCODE /NoRegister
+      ENDDO
+    )
+
+  )
+)
+
+;--------------------------------------------------------------------------------
+; Attach to the running CPU and halt
+;--------------------------------------------------------------------------------
+SYStem.Mode Attach
+Break
+
+;--------------------------------------------------------------------------------
+; List the source code and the registers values
+;--------------------------------------------------------------------------------
+List Register(pc) /Track /MarkPC
+Register.view /SpotLight
+
+;--------------------------------------------------------------------------------
+; Re-enable all active breakpoints
+;--------------------------------------------------------------------------------
+Break.DISable /ALL
+Break.ENable /ALL
+
+;--------------------------------------------------------------------------------
+; Create the debug session log file
+;--------------------------------------------------------------------------------
+LOG.ON
+LOG.OPEN config.log
+
+;--------------------------------------------------------------------------------
+; Load window layout
+;--------------------------------------------------------------------------------
+DO WinLayout.cmm
+
+;--------------------------------------------------------------------------------
+; Load only the symbols from the ELF file
+;--------------------------------------------------------------------------------
+Data.LOAD.Elf ..\Output\m4f_baremetal_am6254_nosdk.elf /NoCODE /NoRegister
