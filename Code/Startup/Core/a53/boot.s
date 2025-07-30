@@ -67,6 +67,11 @@ _start:
     mov x0, #0x66
     msr SCR_EL3, x0
 
+    /* enable FPU */
+    mrs x0, CPACR_EL1
+    orr x1, x0, #(0x3ul<<20)
+    msr CPACR_EL1, x0
+
     /* Set up ACTLR */
     mov x0, #0x73
     msr ACTLR_EL3, x0
