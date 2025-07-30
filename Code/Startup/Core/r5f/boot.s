@@ -54,13 +54,15 @@ _start:
 
        /* enable the vectored interrupt controller */
        mrc p15, #0, r0, c1, c0, #0
-       orr r0, r0, #(1<<24)
+       orr r0, r0, #(1ul<<24)
        mcr p15, #0, r0, c1, c0, #0
 
        /* enable FPU */
        mrc p15, 0, r0, c1, c0, 2
        orr r1, r0, #(0xFul<<20)
        mcr p15, 0, r1, c1, c0, 2
+       mov r0,#(1ul<<30)
+       fmxr fpexc,r0
 
        /* Setup the stack pointer for the System mode */
        ldr r3, =__SYS_STACK_TOP
