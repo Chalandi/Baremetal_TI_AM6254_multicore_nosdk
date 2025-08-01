@@ -25,49 +25,18 @@ jobs:
           sudo tar -xf arm-gnu-toolchain-14.3.rel1-x86_64-aarch64-none-elf.tar.xz -C /arm-toolchain
           sudo tar -xf arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi.tar.xz -C /arm-toolchain
 
-      - name: Verify Toolchain Installation
-        run: |
-          sudo ls -la /arm-toolchain/arm-gnu-toolchain-14.3.rel1-x86_64-aarch64-none-elf/bin
-          sudo find /arm-toolchain -name aarch64-none-elf-gcc
-          sudo ls -la /arm-toolchain/arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi/bin
-          sudo find /arm-toolchain -name arm-none-eabi-gcc
-
-      - name: Add arm Toolchain to PATH
-        run: |
-          echo "AARCH64_TOOLCHAIN=/arm-toolchain/arm-gnu-toolchain-14.3.rel1-x86_64-aarch64-none-elf/bin/" >> $GITHUB_ENV
-          echo "PATH=AARCH64_TOOLCHAIN:$PATH" >> $GITHUB_ENV
-          echo "ARM_TOOLCHAIN=/arm-toolchain/arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi/bin/" >> $GITHUB_ENV
-          echo "PATH=ARM_TOOLCHAIN:$PATH" >> $GITHUB_ENV
-
-      - name: Verify PATH and Check aarch64-none-elf-gcc
-        run: |
-          echo "Current PATH: $PATH"
-          echo "AARCH64_TOOLCHAIN: $AARCH64_TOOLCHAIN"
-          which aarch64-none-elf-gcc || echo "aarch64-none-elf-gcc not found"
-
-      - name: Verify PATH and Check arm-none-eabi-gcc
-        run: |
-          echo "Current PATH: $PATH"
-          echo "ARM_TOOLCHAIN: $ARM_TOOLCHAIN"
-          which arm-none-eabi-gcc || echo "arm-none-eabi-gcc not found"
-
-      - name: Verify PATHs in a New Step
-        run: |
-          echo "Updated PATH: $PATH"
-          which aarch64-none-elf-gcc || echo "aarch64-none-elf-gcc not found"
-          which arm-none-eabi-gcc || echo "arm-none-eabi-gcc not found"
-
-      - name: Run Rebuild with Absolute Path
+      - name: Run Rebuild with Absolute Path Added
         env:
           GITHUB_ACTIONS: true
         run: |
-          echo "Query toolchain versions"
-          /arm-toolchain/arm-gnu-toolchain-14.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-gcc --version
-          /arm-toolchain/arm-gnu-toolchain-14.3.rel1-x86_64-aarch64-none-elf/bin/arn-none-eabi-gcc --version
+          echo "Query toolchain version aarch64-none-elf"
+          /arm-toolchain/arm-gnu-toolchain-14.3.rel1-x86_64-aarch64-none-elf/bin/aarch64-none-elf-g++ --version
+          /arm-toolchain/arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi/bin/arn-none-eabi-g++ --version
           cd ./Build
           echo
           echo "Add toolchain absolute paths"
-          export PATH=/arm-toolchain/arm-gnu-toolchain-14.3.rel1-x86_64-aarch64-none-elf/bin/:/arm-toolchain/arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi/bin/:$PATH
+          export PATH=/arm-toolchain/arm-gnu-toolchain-14.3.rel1-x86_64-aarch64-none-elf/bin/:$PATH
+          export PATH=/arm-toolchain/arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi/bin/:$PATH
           sudo chmod +x ./Rebuild.sh
           echo
           echo "Rebuild all core binaries"
