@@ -191,6 +191,6 @@ static void Startup_InitSystemClock(void)
 //-----------------------------------------------------------------------------------------
 static void Startup_InitSystemPeripheral(void)
 {
-#include "led.h"
+#include "gpio.h"
   LED_INIT();
 }
