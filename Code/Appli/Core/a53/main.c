@@ -1,13 +1,15 @@
-#include <stdint.h>
 #include "led.h"
 #include "core_macros.h"
 #include "gic-500.h"
 
+#include <stdbool.h>
+#include <stdint.h>
 
 void main_core1(void);
 void main_core2(void);
 void main_core3(void);
 void timer_isr(void);
+
 uint32_t GetActiveCoreId(void);
 
 //----------------------------------------------------------------------------------------
@@ -22,12 +24,12 @@ uint32_t GetActiveCoreId(void);
 void main(void)
 {
   uint32_t ActiveCore = GetActiveCoreId();
-  
+
   /* configure the gic */
   volatile gic500_gicdRegs* pGICD = (volatile gic500_gicdRegs* const)GICD_BASE;
   volatile gic500_gicrRegs* pGICR = (volatile gic500_gicrRegs* const)GICR_BASE;
 
- /* configure the GIC-500 distributor */
+  /* configure the GIC-500 distributor */
   pGICD->CTLR = (1 << 5) | (1 << 4);
   pGICD->CTLR = 1 | (1 << 5) | (1 << 4);
 
@@ -63,13 +65,22 @@ void main(void)
   /* Set level-triggered */
   pGICR->CORE[ActiveCore].SGI_PPI.ICFGR0 &= ~(uint32_t)(1 << ((29 - 16) * 2)); // clear bit to set level-triggered
 
+  /* Initialize all 4 user-LEDs to on */
+  switch(ActiveCore){
+     case 0: LED_1_ON(); break;
+     case 1: LED_2_ON(); break;
+     case 2: LED_3_ON(); break;
+     case 3: LED_4_ON(); break;
+     default: break;
+  }
+
+  /* start the timer */
+  ARM64_WRITE_SYSREG(CNTPS_TVAL_EL1, UINT32_C(0x0BEBC200));
+  ARM64_WRITE_SYSREG(CNTPS_CTL_EL1, 1);
+
   /* enable global interrupt */
   arch_enable_ints();
   arch_enable_fiqs();
-
-  /* start the timer */
-  ARM64_WRITE_SYSREG(CNTPS_TVAL_EL1, 0x0BEBC200);
-  ARM64_WRITE_SYSREG(CNTPS_CTL_EL1, 1);
 
   while(1);
 }
@@ -85,13 +96,16 @@ void main(void)
 //----------------------------------------------------------------------------------------
 void timer_isr(void)
 {
-  static uint32_t cpt[4] = {0};
-  static uint64_t intid[4] = {0};
-  uint32_t ActiveCore = GetActiveCoreId();
+  static uint32_t cpt[4] = {0u};
+  static uint64_t intid[4] = {0u};
+
+  const uint32_t ActiveCore = GetActiveCoreId();
 
   intid[ActiveCore] = ARM64_READ_SYSREG(ICC_IAR0_EL1);
 
-  if(cpt[ActiveCore] % 2 == 0)
+  const bool switch_on = (!(cpt[ActiveCore] % 2u == 0u));
+
+  if(switch_on)
   {
     switch(ActiveCore){
        case 0: LED_1_ON(); break;
@@ -112,7 +126,7 @@ void timer_isr(void)
     }
   }
 
-  ARM64_WRITE_SYSREG(CNTPS_TVAL_EL1, 0x0BEBC200);
+  ARM64_WRITE_SYSREG(CNTPS_TVAL_EL1, UINT32_C(0x0BEBC200));
   cpt[ActiveCore]++;
   ARM64_WRITE_SYSREG(ICC_EOIR0_EL1, intid[ActiveCore]);
 }

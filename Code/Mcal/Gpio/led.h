@@ -4,15 +4,15 @@
 
 #include <stdint.h>
 
-#define PADCFG_CTRL0_CFG0_PADCONFIG3   0x000F400Cul
-#define PADCFG_CTRL0_CFG0_PADCONFIG4   0x000F4010ul
-#define PADCFG_CTRL0_CFG0_PADCONFIG5   0x000F4014ul
-#define PADCFG_CTRL0_CFG0_PADCONFIG6   0x000F4018ul
+#define PADCFG_CTRL0_CFG0_PADCONFIG3  UINT32_C(0x000F400C)
+#define PADCFG_CTRL0_CFG0_PADCONFIG4  UINT32_C(0x000F4010)
+#define PADCFG_CTRL0_CFG0_PADCONFIG5  UINT32_C(0x000F4014)
+#define PADCFG_CTRL0_CFG0_PADCONFIG6  UINT32_C(0x000F4018)
 
-#define GPIO_DIR01       0x00600010ul
-#define GPIO_OUT_DATA01  0x00600014ul
-#define GPIO_SET_DATA01  0x00600018ul
-#define GPIO_CLR_DATA01  0x0060001Cul
+#define GPIO_DIR01       UINT32_C(0x00600010)
+#define GPIO_OUT_DATA01  UINT32_C(0x00600014)
+#define GPIO_SET_DATA01  UINT32_C(0x00600018)
+#define GPIO_CLR_DATA01  UINT32_C(0x0060001C)
 
 #define LED_1   6
 #define LED_2   5
@@ -25,13 +25,13 @@
                     *(volatile uint32_t*)(PADCFG_CTRL0_CFG0_PADCONFIG4) &= ~((uint32_t)1ul <<21);  \
                     *(volatile uint32_t*)(PADCFG_CTRL0_CFG0_PADCONFIG5) &= ~((uint32_t)1ul <<21);  \
                     *(volatile uint32_t*)(PADCFG_CTRL0_CFG0_PADCONFIG6) &= ~((uint32_t)1ul <<21);  \
-                    *(volatile uint32_t*)(GPIO_DIR01) &= ~((uint32_t)0x78ul);                      \
                     *(volatile uint32_t*)(GPIO_CLR_DATA01) |= 0x78;                                \
                     *(volatile uint32_t*)(GPIO_OUT_DATA01) &= ~((uint32_t)0x78ul);                 \
+                    *(volatile uint32_t*)(GPIO_DIR01) &= ~((uint32_t)0x78ul);                      \
                     }while(0)
 
 #define LED_ON(x)      do{*(volatile uint32_t*)(GPIO_SET_DATA01) |= (1ul << x); *(volatile uint32_t*)(GPIO_OUT_DATA01) |= (1ul << x);}while(0)
-#define LED_OFF(x)     do{*(volatile uint32_t*)(GPIO_CLR_DATA01) |= (1ul << x); *(volatile uint32_t*)(GPIO_OUT_DATA01) &= ~(uint32_t)(1ul << x);}while(0)
+#define LED_OFF(x)     do{*(volatile uint32_t*)(GPIO_CLR_DATA01) |= (1ul << x); *(volatile uint32_t*)(GPIO_OUT_DATA01) &= (uint32_t)(~(uint32_t)(1ul << x));}while(0)
 
 
 #define LED_1_ON()   LED_ON(LED_1)
