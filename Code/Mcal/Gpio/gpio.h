@@ -23,7 +23,7 @@
 
 #define OUTPUT_HIGH(instance_base, pin)   do{*(volatile uint32_t*)(instance_base + (uintptr_t)((pin/32) * 0x28) + (uintptr_t)0x08 /* GPIO_SET_DATA */) = (1ul << (pin % 32));}while(0)
 #define OUTPUT_LOW(instance_base, pin)    do{*(volatile uint32_t*)(instance_base + (uintptr_t)((pin/32) * 0x28) + (uintptr_t)0x0C /* GPIO_CLR_DATA */) = (1ul << (pin % 32));}while(0)
-
+#define OUTPUT_TOGGLE(instance_base, pin)  do{static uintptr_t add_##instance_base##pin=(uintptr_t)(instance_base + (uintptr_t)((pin/32) * 0x28) + (uintptr_t)0x0C); *(volatile uint32_t*)(add_##instance_base##pin) = (1ul << (pin % 32));add_##instance_base##pin ^= 4;}while(0)
 
 /* LED MACROS */
 
@@ -49,6 +49,10 @@
 #define LED_3_OFF()  OUTPUT_LOW(GPIO0, LED_3)
 #define LED_4_OFF()  OUTPUT_LOW(GPIO0, LED_4)
 
+#define LED_1_TOGGLE()  OUTPUT_TOGGLE(GPIO0, LED_1)
+#define LED_2_TOGGLE()  OUTPUT_TOGGLE(GPIO0, LED_2)
+#define LED_3_TOGGLE()  OUTPUT_TOGGLE(GPIO0, LED_3)
+#define LED_4_TOGGLE()  OUTPUT_TOGGLE(GPIO0, LED_4)
 
 
 

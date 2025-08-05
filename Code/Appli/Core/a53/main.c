@@ -96,37 +96,19 @@ void main(void)
 //----------------------------------------------------------------------------------------
 void timer_isr(void)
 {
-  static uint32_t cpt[4] = {0u};
   static uint64_t intid[4] = {0u};
-
   const uint32_t ActiveCore = GetActiveCoreId();
 
   intid[ActiveCore] = ARM64_READ_SYSREG(ICC_IAR0_EL1);
 
-  const bool switch_on = (!(cpt[ActiveCore] % 2u == 0u));
-
-  if(switch_on)
-  {
-    switch(ActiveCore){
-       case 0: LED_1_ON(); break;
-       case 1: LED_2_ON(); break;
-       case 2: LED_3_ON(); break;
-       case 3: LED_4_ON(); break;
-       default: break;
-    }
-  }
-  else
-  {
-    switch(ActiveCore){
-       case 0: LED_1_OFF(); break;
-       case 1: LED_2_OFF(); break;
-       case 2: LED_3_OFF(); break;
-       case 3: LED_4_OFF(); break;
-       default: break;
-    }
+  switch(ActiveCore){
+     case 0: LED_1_TOGGLE(); break;
+     case 1: LED_2_TOGGLE(); break;
+     case 2: LED_3_TOGGLE(); break;
+     case 3: LED_4_TOGGLE(); break;
+     default: break;
   }
 
   ARM64_WRITE_SYSREG(CNTPS_TVAL_EL1, UINT32_C(0x0BEBC200));
-  cpt[ActiveCore]++;
   ARM64_WRITE_SYSREG(ICC_EOIR0_EL1, intid[ActiveCore]);
 }
